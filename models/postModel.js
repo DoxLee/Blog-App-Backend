@@ -31,10 +31,10 @@ const postModel = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
-    select: false,
   },
-  createdAt: { type: Date, default: Date.now },
-  likes: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now() },
+  // Store Likes with user ref
+  likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = Post = mongoose.model("post", postModel);
