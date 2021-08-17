@@ -4,6 +4,10 @@ const User = require("./userModel");
 const Schema = mongoose.Schema;
 
 const postModel = new Schema({
+  image: {
+    type: Object,
+    required: true,
+  },
   title: {
     type: String,
     required: true,
@@ -13,17 +17,23 @@ const postModel = new Schema({
     type: String,
     required: true,
   },
-
   content: {
     type: String,
     required: true,
   },
-  cathegory: {
-    type: String,
-    required: true,
-  },
-  cover: {
-    type: String,
+  cathegory: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
+  tag: [
+    {
+      type: String,
+    },
+  ],
+  publishAt: {
+    type: Date,
     required: true,
   },
   authorName: { type: String, required: true },
@@ -32,7 +42,7 @@ const postModel = new Schema({
     ref: "User",
     required: true,
   },
-  createdAt: { type: Date, default: Date.now() },
+  createdAt: { type: Date, default: Date.now(), select: false },
   // Store Likes with user ref
   likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });

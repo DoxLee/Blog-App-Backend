@@ -21,10 +21,13 @@ router.post(routes.userPosts, auth, async (req, res) => {
 });
 
 router.post(routes.getPosts, async (req, res) => {
+  const time = new Date().getTime();
   try {
-    let { limit = 6, filter = {} } = req.body;
+    let { limit = 6 } = req.body;
 
-    const posts = await Post.find(filter).sort({ _id: -1 }).limit(limit);
+    const posts = await Post.find({ publishAt: { $lte: time } })
+      .sort({ _id: -1 })
+      .limit(limit);
     res.json(posts);
   } catch (error) {
     res.json({ err: error });
@@ -60,18 +63,22 @@ router.post(routes.getPost, async (req, res) => {
     res.json({ err: error });
   }
 });
-
 router.post(routes.createBlogPost, auth, async (req, res) => {
   try {
-    let { title, content, description } = req.body;
+    let { image, title, description, content, cathegory, tag, publishAt } =
+      req.body;
 
     if (!title || !content || !description)
       return res.json({ err: "You should fill the text area or title! " });
 
     const post = new Post({
+      image,
       title,
       description,
       content,
+      cathegory,
+      tag,
+      publishAt,
       authorName: req.user.userName,
       author: req.user._id,
     });
