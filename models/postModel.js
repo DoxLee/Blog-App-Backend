@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const User = require("./userModel");
+const Comment = require("./commentModel");
 
 const Schema = mongoose.Schema;
 
@@ -34,7 +35,7 @@ const postModel = new Schema({
   ],
   publishAt: {
     type: Date,
-    required: true,
+    default: Date.now(),
   },
   authorName: { type: String, required: true },
   author: {
@@ -45,6 +46,7 @@ const postModel = new Schema({
   createdAt: { type: Date, default: Date.now(), select: false },
   // Store Likes with user ref
   likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
 });
 
 module.exports = Post = mongoose.model("post", postModel);

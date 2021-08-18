@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const Post = require("../models/postModel");
+const Comment = require("../models/commentModel");
 const auth = require("../middleware/auth");
 const User = require("../models/userModel");
 
@@ -10,6 +11,8 @@ const routes = {
   updatePost: "/update-blog-post",
   userPosts: "/get-user-posts",
   likePost: "/like-post",
+  commentPost: "/comment-post",
+  deleteComment: "/delete-comment",
 };
 
 router.post(routes.userPosts, auth, async (req, res) => {
@@ -92,7 +95,7 @@ router.post(routes.createBlogPost, auth, async (req, res) => {
 });
 
 router.post(routes.likePost, auth, async (req, res) => {
-  const { postId } = req.body;
+  let { postId } = req.body;
   try {
     let post = await Post.findById(postId);
     if (post.likes.includes(req.user._id)) {
@@ -106,6 +109,39 @@ router.post(routes.likePost, auth, async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     res.json({ error });
+  }
+});
+
+router.post(routes.commentPost, auth, async (req, res) => {
+  let { postId, content } = req.body;
+  try {
+    const comment = new Comment({
+      author: req.user._id,
+      content,
+      post: postId,
+    });
+
+    const commentRes = await comment.save();
+
+    console.log(commentRes);
+
+    const post = await Post.findById(postId).select("comments");
+    post.comments.push(commentRes._id);
+
+    console.log(post);
+    await post.save();
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+router.post(routes.deleteComment, async (req, res) => {
+  let { commentId, postId } = req.body;
+  try {
+    await Comment.findByIdAndDelete(commentId);
+    res.sendStatus(200);
+  } catch (error) {
+    res.json(error);
   }
 });
 
