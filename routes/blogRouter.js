@@ -9,6 +9,7 @@ const routes = {
   getPost: "/get-post",
   updatePost: "/update-blog-post",
   userPosts: "/get-user-posts",
+  likePost: "/like-post",
 };
 
 router.post(routes.userPosts, auth, async (req, res) => {
@@ -87,6 +88,24 @@ router.post(routes.createBlogPost, auth, async (req, res) => {
     res.json(true);
   } catch (error) {
     res.json({ err: error });
+  }
+});
+
+router.post(routes.likePost, auth, async (req, res) => {
+  const { postId } = req.body;
+  try {
+    let post = await Post.findById(postId);
+    if (post.likes.includes(req.user._id)) {
+      post.likes = post.likes.filter(
+        (item) => String(item) !== String(req.user._id)
+      );
+    } else {
+      post.likes.push(req.user._id);
+    }
+    await post.save();
+    res.sendStatus(200);
+  } catch (error) {
+    res.json({ error });
   }
 });
 
