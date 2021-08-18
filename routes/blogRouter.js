@@ -13,6 +13,7 @@ const routes = {
   likePost: "/like-post",
   commentPost: "/comment-post",
   deleteComment: "/delete-comment",
+  getComments: "/get-comments",
 };
 
 router.post(routes.userPosts, auth, async (req, res) => {
@@ -138,8 +139,40 @@ router.post(routes.commentPost, auth, async (req, res) => {
 router.post(routes.deleteComment, async (req, res) => {
   let { commentId, postId } = req.body;
   try {
-    await Comment.findByIdAndDelete(commentId);
+    const comment = await Comment.findById(commentId);
+    const post = await Post.findById(comment.post).select("comments");
+
+    post.comments = post.comments.filter(
+      (item) => String(item) !== String(comment._id)
+    );
+    await comment.delete();
+
+    await post.save();
+
     res.sendStatus(200);
+  } catch (error) {
+    res.json(error);
+  }
+});
+
+router.post(routes.getComments, async (req, res) => {
+  let { postId } = req.body;
+  console.log("get comments");
+  try {
+    // Get Post and populate Comments and populate authors
+    const comments = await Post.findById(postId)
+      .populate({
+        path: "comments",
+        model: Comment,
+        populate: {
+          path: "author",
+          model: User,
+          select: ["userName", "profilePhoto"],
+        },
+      })
+      .select("comments");
+
+    res.json(comments);
   } catch (error) {
     res.json(error);
   }

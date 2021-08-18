@@ -46,7 +46,7 @@ const postModel = new Schema({
   createdAt: { type: Date, default: Date.now(), select: false },
   // Store Likes with user ref
   likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+  comments: [{ type: Schema.Types.ObjectId, ref: "Comment", select: false }],
 });
 
 module.exports = Post = mongoose.model("post", postModel);
