@@ -114,12 +114,11 @@ router.post(routes.likePost, auth, async (req, res) => {
 });
 
 router.post(routes.commentPost, auth, async (req, res) => {
-  let { postId, content } = req.body;
+  let { content } = req.body;
   try {
     const comment = new Comment({
       author: req.user._id,
       content,
-      post: postId,
     });
 
     const commentRes = await comment.save();
@@ -157,7 +156,6 @@ router.post(routes.deleteComment, async (req, res) => {
 
 router.post(routes.getComments, async (req, res) => {
   let { postId } = req.body;
-  console.log("get comments");
   try {
     // Get Post and populate Comments and populate authors
     const comments = await Post.findById(postId)
