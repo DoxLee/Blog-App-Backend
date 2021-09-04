@@ -1,24 +1,17 @@
 const router = require("express").Router();
-const User = require("../models/userModel");
-const RefreshToken = require("../models/refreshTokenModel");
+
+const authController = require("../controllers/authController");
+
 const auth = require("../middleware/auth");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const Routes = {
   register: "/register",
   login: "/login",
   logout: "/logout",
-  getAccesToken: "/get-acces-token",
+  getAccessToken: "/get-access-token",
   isLoggedIn: "/is-logged-in",
   changePassword: "/change-password",
 };
-
-const generateAccesToken = (user) =>
-  jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2h" });
-
-const generateRefreshToken = (user) =>
-  jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
 
 router.post(Routes.register, async (req, res) => {
   try {
@@ -38,8 +31,6 @@ router.post(Routes.register, async (req, res) => {
         .status(400)
         .json({ err: "Enter the same password twice for verification." });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new User({
       email: email,
       userName: userName,
@@ -47,7 +38,7 @@ router.post(Routes.register, async (req, res) => {
     });
     const user = await newUser.save();
 
-    const accesToken = generateAccesToken({
+    const accesToken = generateAccessToken({
       id: user._id,
     });
 
@@ -75,52 +66,7 @@ router.post(Routes.register, async (req, res) => {
   }
 });
 
-router.post(Routes.login, async (req, res) => {
-  try {
-    let { userName, password } = req.body;
-
-    if (!userName || !password) {
-      res.status(400).json({ err: "Username or password is empty!" });
-    }
-    let user = await User.findOne({ userName: userName }).select([
-      "userName",
-      "password",
-    ]);
-
-    if (user === null)
-      return res.status(400).json({ err: "There is no such user!" });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) return res.status(400).json({ err: "Invalid password." });
-
-    const accesToken = generateAccesToken({
-      id: user._id,
-    });
-
-    await RefreshToken.deleteMany({ userId: user._id });
-
-    const refreshToken = generateRefreshToken({ id: user._id });
-
-    const newRefreshToken = new RefreshToken({
-      refreshToken,
-      userId: user._id,
-    });
-
-    const savedRefreshToken = await newRefreshToken.save();
-
-    res.json({
-      accesToken,
-      refreshToken,
-      user: {
-        id: user._id,
-        userName: user.userName,
-      },
-    });
-  } catch (err) {
-    res.json({ err: `Database Problem \n${err.message}` });
-  }
-});
+router.post(Routes.login, authController.login);
 
 router.delete(Routes.logout, auth, async (req, res) => {
   try {
@@ -153,7 +99,7 @@ router.post(Routes.getAccesToken, async (req, res) => {
 
 router.post(Routes.isLoggedIn, async (req, res, next) => {
   try {
-    const token = req.header("acces-token");
+    const token = req.header("access-token");
 
     if (!token) return res.json(false);
 

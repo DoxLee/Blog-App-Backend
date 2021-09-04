@@ -3,11 +3,11 @@ const User = require("../models/userModel");
 
 const auth = (req, res, next) => {
   try {
-    const accesToken = req.header("acces-token");
+    const accesToken = req.header("access-token");
     if (!accesToken)
       return res
         .status(401)
-        .json({ msg: "No acces token, authorization denied." });
+        .json({ msg: "No access token, authorization denied." });
 
     jwt.verify(accesToken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) return res.sendStatus(401);

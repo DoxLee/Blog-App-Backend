@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   profilePhoto: {
@@ -14,6 +15,12 @@ const userSchema = new mongoose.Schema({
     default: "user",
   },
   createdAt: { type: Date, default: Date.now },
+});
+
+// Hash password before save
+
+userSchema.pre("save", async function (next) {
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 module.exports = User = mongoose.model("user", userSchema);
