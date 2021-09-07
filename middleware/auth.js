@@ -1,24 +1,33 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
+/** @type {import("express").RequestHandler} */
+
 const auth = async (req, res, next) => {
   try {
-    const accesToken = req.header("access-token");
-    if (accesToken === null || accesToken === undefined)
+    const { cookies } = req;
+    const accessToken = cookies["access-token"];
+
+    if (accessToken === null || accessToken === undefined)
       return res
         .status(401)
         .json({ msg: "No access token, authorization denied." });
 
     jwt.verify(
-      accesToken,
+      accessToken,
       process.env.ACCESS_TOKEN_SECRET,
       async (err, user) => {
-        if (err) return res.sendStatus(401);
+        if (err) {
+          console.log("error");
+          return res.sendStatus(401);
+        }
 
         await User.findById(user.id, (error, user) => {
-          if (error) res.send(401);
+          if (error) return res.status(401);
+          console.log(user);
           req.user = user;
         });
+
         next();
       }
     );
