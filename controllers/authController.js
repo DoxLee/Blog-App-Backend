@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const generateAccessToken = (user) =>
-  jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "2h" });
+  jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15s" });
 
 const generateRefreshToken = (user) =>
   jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
@@ -66,6 +66,7 @@ exports.register = async (req, res) => {
     res.status(500).json({ err: `Database Problem \n${err.message}` });
   }
 };
+
 /** @type {import("express").RequestHandler} */
 exports.login = async (req, res) => {
   try {
@@ -116,6 +117,7 @@ exports.login = async (req, res) => {
     res.json({ err: `Database Problem \n${err.message}` });
   }
 };
+
 /** @type {import("express").RequestHandler} */
 exports.logout = async (req, res) => {
   try {
@@ -130,6 +132,7 @@ exports.logout = async (req, res) => {
     res.json({ err: `Database Problem \n${err.message}` });
   }
 };
+
 /** @type {import("express").RequestHandler} */
 exports.getAccessToken = async (req, res) => {
   try {

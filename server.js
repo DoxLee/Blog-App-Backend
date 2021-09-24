@@ -26,7 +26,6 @@ mongoose.connect(
 );
 
 app.use("/users", require("./routes/userRouter"));
-app.use("/admin", require("./routes/adminRouter"));
 app.use("/blog", require("./routes/blogRouter"));
 
 app.listen(3000);
